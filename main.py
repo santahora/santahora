@@ -20,19 +20,12 @@ with st.sidebar:
         index=6,
     )
 
-    # st.write("You selected:", dia_selecionado)
-
     decanato_selecionado = st.radio(
         "Selecione o Decanato:",
         ["Todos", "Centro", "Leste"],
         #, "Oeste", "Norte", "Sul", "Tamarana", "Cambé", "Rolândia", "Sertanópolis", "Ibiporã", "Porecatu"
         index=0,
     )
-
-    # st.write("You selected:", decanato_selecionado)
-
-
-# df_cut = df[df["Dia"] == dia_selecionado].drop(['ID missa', 'Arquidiocese', 'Decanato', 'Cidade', 'Observação'], axis=1).sort_values(by='Horário')
 
 #FILTRANDO O DATABASE
 df_cut = df
@@ -75,7 +68,7 @@ for tab, horario in zip(lista_tabs, df_cut['Horário'].unique()):
                 with colSite:
                     try:
                         for i in df_info_paroquias[df_info_paroquias["Paróquia"] == paroquia]['Site']:
-                            if len(i)>1:
+                            if len(i) > 1:
                                 html = f"<a href = '{i}' rel = 'noopener noreferrer' target = '_blank' >🌐</a>"
                                 st.markdown(html, unsafe_allow_html=True)
                             else:
@@ -100,15 +93,35 @@ for tab, horario in zip(lista_tabs, df_cut['Horário'].unique()):
                     except:
                         pass
 
+                lista_dias_com_missa_na_paroquia = df[df['Paróquia'] == paroquia]['Dia'].unique()
 
+                df_par = df[df['Paróquia'] == paroquia]
 
-
-
+                horarios_do_dia_df = pd.DataFrame()
+                for dia in lista_dias_com_missa_na_paroquia:
+                    horarios_do_dia_dic = {}
+                    lista_horarios = []
+                    for horario in df_par[df_par['Dia'] == dia]['Horário']:
+                        lista_horarios.append(horario)
+                    print(dia)
+                    horarios_do_dia_dic[dia] = lista_horarios
+                    horarios_do_dia_dic_df = pd.DataFrame(horarios_do_dia_dic)
+                    horarios_do_dia_df = pd.concat([horarios_do_dia_df, horarios_do_dia_dic_df], axis=1)
+                horarios_do_dia_df.fillna(value='', inplace=True)
+                st.write('Outras missas')
+                st.dataframe(horarios_do_dia_df, hide_index=True)
 
 css = '''
 <style>
+    /* Aumentar fonte dos horarios na tab */
     .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
     font-size:1.5rem;
+    }
+    
+    
+    /* Esconder botao de download da tabela de horarios */
+    [data-testid="stElementToolbar"] {
+    display: none;
     }
     
 </style>
